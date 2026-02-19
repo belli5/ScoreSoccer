@@ -2,7 +2,7 @@ import React from "react"
 
 type Fixture = {
   fixture: { id: number; date: string }
-  league?: { name?: string; round?: string }
+  league?: { name?: string; round?: string; logo?: string }
   teams: {
     home: { name: string; logo: string }
     away: { name: string; logo: string }
@@ -59,6 +59,19 @@ export default function FixturesCard({
                     >
                     {/* linha principal */}
                     <div className="flex flex-col items-center text-center">
+                        {/* 🔥 COMPETIÇÃO */}
+                        <div className="flex items-center gap-2 mb-2 text-xs text-zinc-400">
+                            {fx.league?.logo && (
+                                <img
+                                src={fx.league.logo}
+                                alt={fx.league?.name}
+                                className="h-4 w-4"
+                                />
+                            )}
+                            <span className="uppercase tracking-wide">
+                                {fx.league?.name}
+                            </span>
+                        </div>
                         <div className="flex flex-col items-center">
                             <div className="flex items-center justify-center gap-6 text-sm text-zinc-100">
   
