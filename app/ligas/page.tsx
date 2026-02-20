@@ -25,6 +25,11 @@ export default async function LigaPage() {
 
   const data = await res.json()
 
+    const league = data?.response?.[0]?.league
+    const leagueName = league?.name ?? "Liga"
+    const leagueLogo = league?.logo
+    const season = league?.season ?? "2024"
+
   const standings: TeamRow[] =
     data?.response?.[0]?.league?.standings?.[0] ?? []
 
@@ -32,7 +37,22 @@ export default async function LigaPage() {
     <main className="bg-[#0B0F14] min-h-screen">
         <Navbar />
         <div className="max-w-6xl mx-auto px-6 py-8">
-            <h1 className="text-2xl font-bold mb-6 p-3 text-[#E5E7EB]">Brasileirão Série A (2024)</h1>
+            <div className="mb-6 flex items-center gap-3 p-3">
+                {leagueLogo && (
+                    <img
+                    src={leagueLogo}
+                    alt={leagueName}
+                    className="h-10 w-10"
+                    />
+                )}
+
+                <div>
+                    <h1 className="text-2xl font-bold text-[#E5E7EB]">
+                    {leagueName} ({season})
+                    </h1>
+                
+                </div>
+            </div>
             <div className="overflow-hidden rounded-xl border border-zinc-300">
                 <table className="w-full text-sm">
                     <thead className="bg-[#39FF14] text-zinc-900 shadow-[0_0_18px_#39FF14]">

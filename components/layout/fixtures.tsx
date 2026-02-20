@@ -1,11 +1,12 @@
 import React from "react"
+import Link from "next/link"
 
 type Fixture = {
   fixture: { id: number; date: string }
   league?: { name?: string; round?: string; logo?: string }
   teams: {
-    home: { name: string; logo: string }
-    away: { name: string; logo: string }
+    home: { id: number; name: string; logo: string }
+    away: { id: number; name: string; logo: string }
   }
   goals?: { home: number | null; away: number | null }
   score?: { fulltime?: { home: number | null; away: number | null } }
@@ -68,16 +69,23 @@ export default function FixturesCard({
                                 className="h-4 w-4"
                                 />
                             )}
-                            <span className="uppercase tracking-wide">
-                                {fx.league?.name}
-                            </span>
+                            <a href="/ligas" className="hover:underline">
+                                <span className="uppercase tracking-wide">
+                                    {fx.league?.name}
+                                </span>
+                            </a>
                         </div>
                         <div className="flex flex-col items-center">
                             <div className="flex items-center justify-center gap-6 text-sm text-zinc-100">
   
                                 {/* TIME CASA */}
                                 <div className="flex items-center gap-2 min-w-[120px] justify-end">
-                                    <span className="text-right">{fx.teams.home.name}</span>
+                                    <Link
+                                        href={`/dashboard/${fx.teams.home.id}`}
+                                        className="hover:underline"
+                                        >
+                                        <span className="text-right">{fx.teams.home.name}</span>
+                                    </Link>
                                     <img
                                     src={fx.teams.home.logo}
                                     alt={fx.teams.home.name}
@@ -97,7 +105,12 @@ export default function FixturesCard({
                                     alt={fx.teams.away.name}
                                     className="h-6 w-6 drop-shadow"
                                     />
-                                    <span className="text-left">{fx.teams.away.name}</span>
+                                    <Link
+                                        href={`/dashboard/${fx.teams.away.id}`}
+                                        className="hover:underline"
+                                        >
+                                        <span className="text-left">{fx.teams.away.name}</span>
+                                    </Link>
                                 </div>
                             </div>
 
