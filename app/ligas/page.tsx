@@ -37,6 +37,10 @@ export default async function LigaPage() {
     <main className="bg-[#0B0F14] min-h-screen">
         <Navbar />
         <div className="max-w-6xl mx-auto px-6 py-8">
+            <h1 className="text-3xl font-bold text-[#E5E7EB]">Ligas</h1>
+            <p className="mt-1 text-[#9CA3AF]">Aqui você pode ver as tabelas de classificação das ligas que você preferir.</p>
+        </div>
+        <div className="max-w-6xl mx-auto px-6 py-8">
             <div className="mb-6 flex items-center gap-3 p-3">
                 {leagueLogo && (
                     <img
