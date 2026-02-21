@@ -21,6 +21,10 @@ export default async function Home() {
   return (
     <main className="bg-[#0B0F14] min-h-screen text-white">
       <Navbar />
+      <div className="max-w-6xl mx-auto px-6 py-8">
+            <h1 className="text-3xl font-bold text-zinc-100">Todos os Jogos</h1>
+            <p className="mt-1 text-[#9CA3AF]">Aqui você pode ver todos os jogos de qualquer campeonato.</p>
+      </div>
 
       <div className="max-w-6xl mx-auto px-6 py-10 space-y-8">
         {days.map((group: any) => (
