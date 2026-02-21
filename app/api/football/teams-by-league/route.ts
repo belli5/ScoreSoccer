@@ -1,22 +1,25 @@
 import { apiFootball } from "@/lib/api_football"
 
-export async function GET() {
-  const season = "2024"
+export async function GET(req: Request) {
+  const { searchParams } = new URL(req.url)
+  const season = searchParams.get("season") || "2024"
 
-  const serieA = "71"
-  const serieB = "72"
+  const leagues = {
+    serieA: "71",
+    serieB: "72",
+    premier: "39",
+  }
 
-  const [dataA, dataB] = await Promise.all([
-    apiFootball("/teams", { league: serieA, season }),
-    apiFootball("/teams", { league: serieB, season }),
+  const [dataA, dataB, dataP] = await Promise.all([
+    apiFootball("/teams", { league: leagues.serieA, season }),
+    apiFootball("/teams", { league: leagues.serieB, season }),
+    apiFootball("/teams", { league: leagues.premier, season }),
   ])
-
-  const teamsA = dataA?.response ?? []
-  const teamsB = dataB?.response ?? []
 
   return Response.json({
     season,
-    serieA: teamsA,
-    serieB: teamsB,
+    serieA: dataA?.response ?? [],
+    serieB: dataB?.response ?? [],
+    premier: dataP?.response ?? [],
   })
 }

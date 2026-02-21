@@ -11,6 +11,7 @@ export default async function FavoritosPage() {
 
   const serieA = (data?.serieA ?? []).map((x: any) => x.team)
   const serieB = (data?.serieB ?? []).map((x: any) => x.team)
+  const premier = (data?.premier ?? []).map((x: any) => x.team)
 
   return (
     <main className="bg-[#0B0F14] min-h-screen text-white">
@@ -35,6 +36,13 @@ export default async function FavoritosPage() {
                     Série B 2024
                 </h2>
                 <TeamsGrid teams={serieB} />
+            </section>
+
+            <section>
+                <h2 className="text-xl font-semibold mb-4 text-[#39FF14]">
+                    Premier League 2024
+                </h2>
+                <TeamsGrid teams={premier} />
             </section>
         </div>
     </main>
