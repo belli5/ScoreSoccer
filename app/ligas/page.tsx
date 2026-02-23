@@ -1,122 +1,108 @@
 import Navbar from "@/components/layout/Navbar"
 import Link from "next/link"
+import LeagueFilter from "@/components/ui/filter"
 
-type TeamRow = {
-  rank: number
-  points: number
-  goalsDiff: number
-  team: {
-    id: number
-    name: string
-    logo: string
-  }
-  all: {
-    played: number
-    win: number
-    draw: number
-    lose: number
-  }
+export const dynamic = "force-dynamic"
+export const revalidate = 0
+
+type PageProps = {
+  searchParams: Promise<{ league?: string }>
 }
 
-export default async function LigaPage() {
-  const res = await fetch("http://localhost:3000/api/football/standings", {
-    cache: "no-store",
-  })
+export default async function LigaPage({ searchParams }: PageProps) {
+  const sp = await searchParams
+  const leagueId = sp.league ?? "71"
+  
+  const res = await fetch(
+    `http://localhost:3000/api/football/standings?league=${leagueId}&season=2024`,
+    { cache: "no-store" }
+  )
 
   const data = await res.json()
 
-    const league = data?.response?.[0]?.league
-    const leagueName = league?.name ?? "Liga"
-    const leagueLogo = league?.logo
-    const season = league?.season ?? "2024"
+  const league = data?.response?.[0]?.league
+  const leagueName = league?.name ?? "Liga"
+  const leagueLogo = league?.logo
+  const season = league?.season ?? "2024"
 
-  const standings: TeamRow[] =
+  const standings =
     data?.response?.[0]?.league?.standings?.[0] ?? []
 
   return (
     <main className="bg-[#0B0F14] min-h-screen">
-        <Navbar />
-        <div className="max-w-6xl mx-auto px-6 py-8">
-            <h1 className="text-3xl font-bold text-[#E5E7EB]">Ligas</h1>
-            <p className="mt-1 text-[#9CA3AF]">Aqui você pode ver as tabelas de classificação das ligas que você preferir.</p>
+      <Navbar />
+
+      <div className="max-w-6xl mx-auto px-6 py-8 space-y-6">
+        <h1 className="text-3xl font-bold text-white">Ligas</h1>
+
+        {/* 🔥 FILTRO REUTILIZÁVEL */}
+        <LeagueFilter
+          options={[
+            { id: "71", name: "Série A" },
+            { id: "72", name: "Série B" },
+            { id: "39", name: "Premier League" },
+          ]}
+        />
+
+        {/* Cabeçalho da Liga */}
+        <div className="flex items-center gap-3 p-3">
+          {leagueLogo && (
+            <img src={leagueLogo} alt={leagueName} className="h-10 w-10" />
+          )}
+          <h2 className="text-2xl font-bold text-white">
+            {leagueName} ({season})
+          </h2>
         </div>
-        <div className="max-w-6xl mx-auto px-6 py-8">
-            <div className="mb-6 flex items-center gap-3 p-3">
-                {leagueLogo && (
+
+        {/* Tabela */}
+        <div className="overflow-hidden rounded-xl border border-zinc-700">
+          <table className="w-full text-sm">
+            <thead className="bg-[#39FF14] text-black">
+              <tr>
+                <th className="p-3 text-left">Pos</th>
+                <th className="p-3 text-left">Time</th>
+                <th className="p-3 text-center">PJ</th>
+                <th className="p-3 text-center">V</th>
+                <th className="p-3 text-center">E</th>
+                <th className="p-3 text-center">D</th>
+                <th className="p-3 text-center">SG</th>
+                <th className="p-3 text-center">Pts</th>
+              </tr>
+            </thead>
+            <tbody className="text-white">
+              {standings.map((row: any) => (
+                <tr
+                  key={row.team.id}
+                  className="border-t border-zinc-700 hover:bg-zinc-800 transition"
+                >
+                  <td className="p-3">{row.rank}</td>
+
+                  <td className="p-3 flex items-center gap-3">
                     <img
-                    src={leagueLogo}
-                    alt={leagueName}
-                    className="h-10 w-10"
+                      src={row.team.logo}
+                      alt={row.team.name}
+                      className="h-5 w-5"
                     />
-                )}
+                    <Link
+                      href={`/dashboard/${row.team.id}`}
+                      className="hover:underline"
+                    >
+                      {row.team.name}
+                    </Link>
+                  </td>
 
-                <div>
-                    <h1 className="text-2xl font-bold text-[#E5E7EB]">
-                    {leagueName} ({season})
-                    </h1>
-                
-                </div>
-            </div>
-            <div className="overflow-hidden rounded-xl border border-zinc-300">
-                <table className="w-full text-sm">
-                    <thead className="bg-[#39FF14] text-zinc-900 shadow-[0_0_18px_#39FF14]">
-                        <tr>
-                        <th className="p-3 text-left">Pos</th>
-                        <th className="p-3 text-left">Time</th>
-                        <th className="p-3 text-center">PJ</th>
-                        <th className="p-3 text-center">V</th>
-                        <th className="p-3 text-center">E</th>
-                        <th className="p-3 text-center">D</th>
-                        <th className="p-3 text-center">SG</th>
-                        <th className="p-3 text-center">Pts</th>
-                        </tr>
-                    </thead>
-
-                    <tbody className="text-white">
-                        {standings.map((row) => {
-
-                            let rowColor = ""
-
-                            if (row.rank <= 4) {
-                            rowColor = "text-orange-400"
-                            } else if (row.rank >= 17) {
-                            rowColor = "text-red-500"
-                            }
-
-                            return (
-                            <tr
-                                key={row.team.name}
-                                className={`border-t border-zinc-700 hover:bg-zinc-800 transition ${rowColor}`}
-                            >
-                                <td className="p-3">{row.rank}</td>
-
-                                <td className="p-3 flex items-center gap-3">
-                                <img
-                                    src={row.team.logo}
-                                    alt={row.team.name}
-                                    className="h-5 w-5"
-                                />
-                                <Link
-                                    href={`/dashboard/${row.team.id}`}
-                                    className="hover:underline underline-offset-4"
-                                    >
-                                    {row.team.name}
-                                </Link>
-                                </td>
-
-                                <td className="p-3 text-center">{row.all.played}</td>
-                                <td className="p-3 text-center">{row.all.win}</td>
-                                <td className="p-3 text-center">{row.all.draw}</td>
-                                <td className="p-3 text-center">{row.all.lose}</td>
-                                <td className="p-3 text-center">{row.goalsDiff}</td>
-                                <td className="p-3 text-center font-bold">{row.points}</td>
-                            </tr>
-                            )
-                        })}
-                    </tbody>
-                </table>
-            </div>
+                  <td className="p-3 text-center">{row.all.played}</td>
+                  <td className="p-3 text-center">{row.all.win}</td>
+                  <td className="p-3 text-center">{row.all.draw}</td>
+                  <td className="p-3 text-center">{row.all.lose}</td>
+                  <td className="p-3 text-center">{row.goalsDiff}</td>
+                  <td className="p-3 text-center font-bold">{row.points}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
+      </div>
     </main>
   )
 }
