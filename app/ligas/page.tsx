@@ -83,10 +83,7 @@ export default async function LigaPage({ searchParams }: PageProps) {
                       alt={row.team.name}
                       className="h-5 w-5"
                     />
-                    <Link
-                      href={`/dashboard/${row.team.id}`}
-                      className="hover:underline"
-                    >
+                    <Link href={`/dashboard/${row.team.id}?league=${leagueId}&season=2024`}>
                       {row.team.name}
                     </Link>
                   </td>

@@ -4,20 +4,25 @@ import TeamCharts from "@/components/layout/charts"
 
 type PageProps = {
   params: Promise<{ teamId: string }>
+  searchParams: Promise<{ league?: string; season?: string }>
 }
 
-export default async function TeamDashboard({ params }: PageProps) {
+export default async function TeamDashboard({ params, searchParams }: PageProps) {
     const { teamId } = await params
+    const sp = await searchParams
 
-    // (simples) baseUrl local — depois a gente melhora isso
+    const leagueId = sp.league ?? "71"
+    const season = sp.season ?? "2024"
+
     const baseUrl = "http://localhost:3000"
-
+    
     const teamRes = await fetch(`${baseUrl}/api/football/teams?teamId=${teamId}`, {
         cache: "no-store",
     })
     const teamData = await teamRes.json()
 
-    const analyticsRes = await fetch(`${baseUrl}/api/football/analytics?teamId=${teamId}&league=71&season=2024`,
+    const analyticsRes = await fetch(
+    `${baseUrl}/api/football/analytics?teamId=${teamId}&league=${leagueId}&season=${season}`,
     { cache: "no-store" }
     )
     const analytics = await analyticsRes.json()
@@ -26,8 +31,8 @@ export default async function TeamDashboard({ params }: PageProps) {
     const venue = teamData?.response?.[0]?.venue
 
     const fixturesRes = await fetch(
-        `${baseUrl}/api/football/jogos?teamId=${teamId}&league=71&season=2024`,
-        { cache: "no-store" }
+    `${baseUrl}/api/football/jogos?teamId=${teamId}&league=${leagueId}&season=${season}`,
+    { cache: "no-store" }
     )
     const fixturesData = await fixturesRes.json()
     const allFixtures = fixturesData?.response ?? []
