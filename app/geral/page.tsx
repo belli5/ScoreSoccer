@@ -1,0 +1,27 @@
+import KpiCards from "@/components/layout/KpiCards"
+import Navbar from "@/components/layout/Navbar"
+
+export default function DashboardPage() {
+  const league = "71"
+  const season = "2024"
+
+  return (
+    <div className="min-h-screen bg-black">
+      <Navbar />
+      <div className="mx-auto w-full max-w-6xl px-6 py-10">
+        <div className="flex flex-col gap-2">
+          <h1 className="text-3xl font-semibold tracking-tight text-white">
+            Dashboard
+          </h1>
+          <p className="text-sm text-zinc-400">
+            Visão geral rápida dos dados do sistema
+          </p>
+        </div>
+
+        <div className="mt-8">
+          <KpiCards league={league} season={season} />
+        </div>
+      </div>
+    </div>
+  )
+}

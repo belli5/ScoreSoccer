@@ -17,7 +17,7 @@ export default function Navbar() {
           <li><Link className="hover:underline underline-offset-4" href="/destaques">Ao Vivo</Link></li>
           <li><Link className="hover:underline underline-offset-4" href="/ligas">Ligas</Link></li>
           <li><Link className="hover:underline underline-offset-4" href="/favoritos">Favoritos</Link></li>
-          <li><Link className="hover:underline underline-offset-4" href="/dashboard">Dashboard</Link></li>
+          <li><Link className="hover:underline underline-offset-4" href="/geral">Dashboard</Link></li>
         </ul>
       </nav>
     </header>
