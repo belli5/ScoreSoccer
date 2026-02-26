@@ -1,6 +1,7 @@
 import Navbar from "@/components/layout/Navbar"
 import Link from "next/link"
 import LeagueFilter from "@/components/ui/filter"
+import { LEAGUES } from "@/lib/leagues"
 
 export const dynamic = "force-dynamic"
 export const revalidate = 0
@@ -11,10 +12,11 @@ type PageProps = {
 
 export default async function LigaPage({ searchParams }: PageProps) {
   const sp = await searchParams
-  const leagueId = sp.league ?? "71"
-  
+  const leagueId = sp.league ?? LEAGUES[0].id // padrão: primeira liga do array
+  const season = "2024"
+
   const res = await fetch(
-    `http://localhost:3000/api/football/standings?league=${leagueId}&season=2024`,
+    `http://localhost:3000/api/football/standings?league=${leagueId}&season=${season}`,
     { cache: "no-store" }
   )
 
@@ -23,10 +25,8 @@ export default async function LigaPage({ searchParams }: PageProps) {
   const league = data?.response?.[0]?.league
   const leagueName = league?.name ?? "Liga"
   const leagueLogo = league?.logo
-  const season = league?.season ?? "2024"
 
-  const standings =
-    data?.response?.[0]?.league?.standings?.[0] ?? []
+  const standings = data?.response?.[0]?.league?.standings?.[0] ?? []
 
   return (
     <main className="bg-[#0B0F14] min-h-screen">
@@ -35,13 +35,9 @@ export default async function LigaPage({ searchParams }: PageProps) {
       <div className="max-w-6xl mx-auto px-6 py-8 space-y-6">
         <h1 className="text-3xl font-bold text-white">Ligas</h1>
 
-        {/* 🔥 FILTRO REUTILIZÁVEL */}
+        {/* ✅ FILTRO vindo do LEAGUES */}
         <LeagueFilter
-          options={[
-            { id: "71", name: "Série A" },
-            { id: "72", name: "Série B" },
-            { id: "39", name: "Premier League" },
-          ]}
+          options={LEAGUES.map((l) => ({ id: l.id, name: l.label }))}
         />
 
         {/* Cabeçalho da Liga */}
@@ -83,7 +79,9 @@ export default async function LigaPage({ searchParams }: PageProps) {
                       alt={row.team.name}
                       className="h-5 w-5"
                     />
-                    <Link href={`/dashboard/${row.team.id}?league=${leagueId}&season=2024`}>
+                    <Link
+                      href={`/dashboard/${row.team.id}?league=${leagueId}&season=${season}`}
+                    >
                       {row.team.name}
                     </Link>
                   </td>

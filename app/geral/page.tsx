@@ -1,5 +1,6 @@
 import KpiCards from "@/components/layout/KpiCards"
 import Navbar from "@/components/layout/Navbar"
+import LeagueOverview from "@/components/layout/LeagueOverview"
 
 export default function DashboardPage() {
   const league = "71"
@@ -21,6 +22,7 @@ export default function DashboardPage() {
         <div className="mt-8">
           <KpiCards league={league} season={season} />
         </div>
+        <LeagueOverview season={season} />
       </div>
     </div>
   )

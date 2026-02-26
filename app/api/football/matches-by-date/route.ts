@@ -1,10 +1,11 @@
 import { apiFootball } from "@/lib/api_football"
 import { getCache, setCache } from "@/lib/simpleCache"
+import { LEAGUES } from "@/lib/leagues"
 
 export async function GET() {
   const season = "2024"
 
-  const leagues = ["71", "72", "39"] 
+  const leagues = LEAGUES.map((l) => l.id)
   const from = `${season}-01-01`
   const to = `${season}-12-31`
 

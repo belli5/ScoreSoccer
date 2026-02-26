@@ -1,11 +1,6 @@
 import { apiFootball } from "@/lib/api_football"
 import { getCache, setCache } from "@/lib/simpleCache"
-
-const SUPPORTED_LEAGUES = [
-  { key: "serieA", label: "Série A", id: "71" },
-  { key: "serieB", label: "Série B", id: "72" },
-  { key: "premier", label: "Premier League", id: "39" },
-]
+import { LEAGUES } from "@/lib/leagues"
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url)
@@ -17,11 +12,11 @@ export async function GET(req: Request) {
   if (cached) return Response.json(cached)
 
   // 1) Ligas totais
-  const leaguesTotal = SUPPORTED_LEAGUES.length
+  const leaguesTotal = LEAGUES.length
 
   // 2) Times totais (somando ligas)
   const teamsResponses = await Promise.all(
-    SUPPORTED_LEAGUES.map((lg) => apiFootball("/teams", { league: lg.id, season }))
+    LEAGUES.map((lg) => apiFootball("/teams", { league: lg.id, season }))
   )
   const teamsTotal = teamsResponses.reduce(
     (acc, data) => acc + (data?.response?.length ?? 0),
@@ -33,7 +28,7 @@ export async function GET(req: Request) {
   const to = `${season}-12-31`
 
   const fixturesResponses = await Promise.all(
-    SUPPORTED_LEAGUES.map((lg) =>
+    LEAGUES.map((lg) =>
       apiFootball("/fixtures", { league: lg.id, season, from, to })
     )
   )
@@ -41,7 +36,9 @@ export async function GET(req: Request) {
   const allFixtures = fixturesResponses.flatMap((d) => d?.response ?? [])
   const gamesTotal = allFixtures.length
 
-  const finished = allFixtures.filter((fx: any) => fx?.fixture?.status?.short === "FT")
+  const finished = allFixtures.filter(
+    (fx: any) => fx?.fixture?.status?.short === "FT"
+  )
 
   let avgGoalsFT: number | null = null
   if (finished.length > 0) {
