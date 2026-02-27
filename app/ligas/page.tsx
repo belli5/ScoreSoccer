@@ -4,7 +4,9 @@ import LeagueFilter from "@/components/ui/filter"
 import { LEAGUES } from "@/lib/leagues"
 
 export const dynamic = "force-dynamic"
-export const revalidate = 0
+
+const baseUrl =
+  process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"
 
 type PageProps = {
   searchParams: Promise<{ league?: string }>
@@ -16,7 +18,7 @@ export default async function LigaPage({ searchParams }: PageProps) {
   const season = "2024"
 
   const res = await fetch(
-    `http://localhost:3000/api/football/standings?league=${leagueId}&season=${season}`,
+    `${baseUrl}/api/football/standings?league=${leagueId}&season=${season}`,
     { cache: "no-store" }
   )
 
