@@ -8,8 +8,6 @@ const LEAGUES = [
   { key: "bundesliga", label: "Bundesliga", id: "78" },
 ] as const
 
-export const revalidate = 60 * 60 * 6 
-
 function pickTop5Gap(standings: any[]) {
   if (!Array.isArray(standings) || standings.length < 5) return null
 
