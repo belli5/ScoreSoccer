@@ -7,7 +7,7 @@ export default function DashboardPage() {
   const season = "2024"
 
   return (
-    <div className="min-h-screen bg-black">
+    <div className="min-h-screen bg-[#0B0F14]">
       <Navbar />
       <div className="mx-auto w-full max-w-6xl px-6 py-10">
         <div className="flex flex-col gap-2">
@@ -20,7 +20,7 @@ export default function DashboardPage() {
         </div>
 
         <div className="mt-8">
-          <KpiCards league={league} season={season} />
+          <KpiCards season={season} />
         </div>
         <LeagueOverview season={season} />
       </div>

@@ -1,9 +1,8 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { LEAGUES } from "@/lib/leagues"
-
 
 type Row = {
   rank: number
@@ -41,25 +40,37 @@ export default function LeagueOverview({ season = "2024" }: { season?: string })
   const [league, setLeague] = useState("71")
   const [data, setData] = useState<Overview | null>(null)
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  const fetchedRef = useRef<Record<string, boolean>>({})
 
   useEffect(() => {
-    let alive = true
-    setLoading(true)
+    // evita double fetch do mesmo league+season no dev
+    const key = `${league}:${season}`
+    if (fetchedRef.current[key]) return
+    fetchedRef.current[key] = true
 
-    fetch(`/api/football/overview?league=${league}&season=${season}`)
-      .then((r) => r.json())
+    const controller = new AbortController()
+    setLoading(true)
+    setError(null)
+
+    fetch(`/api/football/overview?league=${league}&season=${season}`, { signal: controller.signal })
+      .then(async (r) => {
+        const json = await r.json()
+        if (!r.ok) throw json
+        return json as Overview
+      })
       .then((json) => {
-        if (!alive) return
         setData(json)
       })
-      .finally(() => {
-        if (!alive) return
-        setLoading(false)
+      .catch((err) => {
+        if (err?.name === "AbortError") return
+        setData(null)
+        setError(err?.detail || err?.message || "Erro ao carregar overview (rate limit?)")
       })
+      .finally(() => setLoading(false))
 
-    return () => {
-      alive = false
-    }
+    return () => controller.abort()
   }, [league, season])
 
   return (
@@ -71,22 +82,28 @@ export default function LeagueOverview({ season = "2024" }: { season?: string })
         </div>
 
         <label htmlFor="league-select" className="sr-only">
-        Selecionar liga
+          Selecionar liga
         </label>
 
         <select
-            id="league-select"
-            value={league}
-            onChange={(e) => setLeague(e.target.value)}
-            className="h-10 rounded-xl border border-white/10 bg-zinc-950 px-3 text-sm text-white outline-none"
+          id="league-select"
+          value={league}
+          onChange={(e) => setLeague(e.target.value)}
+          className="h-10 rounded-xl border border-white/10 bg-zinc-950 px-3 text-sm text-white outline-none"
         >
-            {LEAGUES.map((l) => (
+          {LEAGUES.map((l) => (
             <option key={l.id} value={l.id}>
-            {l.label}
+              {l.label}
             </option>
-        ))}
+          ))}
         </select>
       </div>
+
+      {error ? (
+        <div className="mt-4 rounded-xl border border-red-500/40 bg-red-500/10 p-3 text-sm text-red-200">
+          {error}
+        </div>
+      ) : null}
 
       <div className="mt-5 grid gap-4 sm:grid-cols-3">
         <MiniCard label="LÍDER" value={loading ? "Carregando..." : data?.leader ?? "—"} />
@@ -103,8 +120,6 @@ export default function LeagueOverview({ season = "2024" }: { season?: string })
           {(data?.top5 ?? []).map((r) => (
             <div key={r.rank} className="flex items-center gap-3 px-4 py-3">
               <div className="w-6 text-sm font-semibold text-[#39FF14]">{r.rank}</div>
-              {/* se quiser logo: */}
-              {/* <img src={r.logo} alt="" className="h-6 w-6" /> */}
               <div className="flex-1 text-sm text-white">{r.name}</div>
               <div className="w-10 text-right text-sm text-white">{r.points}</div>
               <div className="w-10 text-right text-xs text-zinc-400">{r.played}</div>
@@ -114,7 +129,7 @@ export default function LeagueOverview({ season = "2024" }: { season?: string })
             </div>
           ))}
 
-          {!loading && (data?.top5?.length ?? 0) === 0 ? (
+          {!loading && !error && (data?.top5?.length ?? 0) === 0 ? (
             <div className="px-4 py-6 text-sm text-zinc-400">Sem dados para exibir.</div>
           ) : null}
         </div>

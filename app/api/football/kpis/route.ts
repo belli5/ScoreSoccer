@@ -2,65 +2,81 @@ import { apiFootball } from "@/lib/api_football"
 import { getCache, setCache } from "@/lib/simpleCache"
 import { LEAGUES } from "@/lib/leagues"
 
+function extractApiError(data: any): string | null {
+  const err = data?.errors
+  if (!err) return null
+
+  if (Array.isArray(err)) return err.length > 0 ? JSON.stringify(err) : null
+
+  if (typeof err === "object") {
+    const keys = Object.keys(err)
+    if (keys.length === 0) return null
+    for (const k of ["rateLimit", "requests", "token", "message", "plan"]) {
+      if (err[k]) return String(err[k])
+    }
+    return JSON.stringify(err)
+  }
+
+  return String(err)
+}
+
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url)
   const season = searchParams.get("season") || "2024"
 
-  // Como é "geral do site", não depende de league (só do season)
-  const key = `kpis:site:season=${season}`
+  const key = `kpis:site:season=${season}:standingsOnly`
   const cached = getCache(key)
   if (cached) return Response.json(cached)
 
-  // 1) Ligas totais
   const leaguesTotal = LEAGUES.length
 
-  // 2) Times totais (somando ligas)
-  const teamsResponses = await Promise.all(
-    LEAGUES.map((lg) => apiFootball("/teams", { league: lg.id, season }))
-  )
-  const teamsTotal = teamsResponses.reduce(
-    (acc, data) => acc + (data?.response?.length ?? 0),
-    0
-  )
+  let teamsTotal = 0
 
-  // 3) Jogos registrados + 4) Média de gols por partida (FT)
-  const from = `${season}-01-01`
-  const to = `${season}-12-31`
+  // menor gap entre 1º e 5º
+  let mostCompetitive: { id: string; label: string; gapTop5: number } | null = null
 
-  const fixturesResponses = await Promise.all(
-    LEAGUES.map((lg) =>
-      apiFootball("/fixtures", { league: lg.id, season, from, to })
-    )
-  )
+  for (const lg of LEAGUES) {
+    const standingsData = await apiFootball("/standings", {
+      league: lg.id,
+      season,
+    })
 
-  const allFixtures = fixturesResponses.flatMap((d) => d?.response ?? [])
-  const gamesTotal = allFixtures.length
+    const apiErr = extractApiError(standingsData)
+    if (apiErr) {
+      return Response.json(
+        { message: "API-Football error", detail: apiErr },
+        { status: 429 }
+      )
+    }
 
-  const finished = allFixtures.filter(
-    (fx: any) => fx?.fixture?.status?.short === "FT"
-  )
+    const table = standingsData?.response?.[0]?.league?.standings?.[0] ?? []
+    if (!Array.isArray(table) || table.length === 0) continue
 
-  let avgGoalsFT: number | null = null
-  if (finished.length > 0) {
-    const totalGoals = finished.reduce((acc: number, fx: any) => {
-      const h = fx?.goals?.home
-      const a = fx?.goals?.away
-      if (h === null || h === undefined || a === null || a === undefined) return acc
-      return acc + h + a
-    }, 0)
+    // ✅ timesTotal via standings (não usa /teams)
+    teamsTotal += table.length
 
-    avgGoalsFT = totalGoals / finished.length
+    // ✅ gapTop5 via standings
+    if (table.length >= 5) {
+      const p1 = table[0]?.points
+      const p5 = table[4]?.points
+
+      if (typeof p1 === "number" && typeof p5 === "number") {
+        const gap = p1 - p5
+        if (!mostCompetitive || gap < mostCompetitive.gapTop5) {
+          mostCompetitive = { id: String(lg.id), label: lg.label, gapTop5: gap }
+        }
+      }
+    }
   }
 
   const payload = {
     leaguesTotal,
     teamsTotal,
-    gamesTotal,
-    avgGoalsFT, // null => mostra "—"
+    mostCompetitive, // pode ser null se alguma liga não tiver standings/top5
   }
 
-  // 6h (boa: reduz requisições e ainda atualiza durante a temporada)
-  setCache(key, payload, 6 * 60 * 60 * 1000)
+  // ✅ cache forte pra não estourar 10/min
+  setCache(key, payload, 6 * 60 * 60 * 1000) // 6h
 
   return Response.json(payload)
 }

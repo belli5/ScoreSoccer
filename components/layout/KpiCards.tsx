@@ -1,18 +1,12 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 
 type KpiData = {
   leaguesTotal: number
   teamsTotal: number
-  gamesTotal: number
-  avgGoalsFT: number | null
-}
-
-function formatAvg(x: number | null) {
-  if (x === null) return "—"
-  return x.toFixed(2).replace(".", ",")
+  mostCompetitive: { id: string; label: string; gapTop5: number } | null
 }
 
 function KpiItem({
@@ -29,91 +23,94 @@ function KpiItem({
   return (
     <Card className="rounded-2xl border border-[#39FF14] bg-zinc-950/60 shadow-[0_0_15px_#39FF14]">
       <CardContent className="p-3">
-        <p className="text-xs font-medium tracking-wide text-zinc-400">
-          {label}
-        </p>
+        <p className="text-xs font-medium tracking-wide text-zinc-400">{label}</p>
 
         <div className="mt-3 flex items-end justify-between gap-3">
           {loading ? (
             <div className="h-9 w-24 animate-pulse rounded bg-white/10" />
           ) : (
-            <p className="text-3xl font-semibold tracking-tight text-[#39FF14]">
-              {value}
-            </p>
+            <p className="text-3xl font-semibold tracking-tight text-[#39FF14]">{value}</p>
           )}
 
-          {hint ? (
-            <p className="text-[11px] leading-tight text-zinc-500">{hint}</p>
-          ) : null}
+          {hint ? <p className="text-[11px] leading-tight text-zinc-500">{hint}</p> : null}
         </div>
       </CardContent>
     </Card>
   )
 }
 
-export default function KpiCards({
-  league = "71",
-  season = "2024",
-}: {
-  league?: string
-  season?: string
-}) {
+export default function KpiCards({ season = "2024" }: { season?: string }) {
   const [data, setData] = useState<KpiData | null>(null)
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  const fetchedOnce = useRef(false)
 
   useEffect(() => {
-    let alive = true
+    if (fetchedOnce.current) return
+    fetchedOnce.current = true
+
+    const controller = new AbortController()
     setLoading(true)
+    setError(null)
 
-    fetch(`/api/football/kpis?league=${league}&season=${season}`)
-      .then((r) => r.json())
-      .then((json) => {
-        if (!alive) return
-        setData(json)
+    fetch(`/api/football/kpis?season=${season}`, { signal: controller.signal })
+      .then(async (r) => {
+        const json = await r.json()
+        if (!r.ok) throw json
+        return json as KpiData
       })
-      .catch(() => {
-        if (!alive) return
+      .then((json) => setData(json))
+      .catch((err) => {
+        if (err?.name === "AbortError") return
         setData(null)
+        setError(err?.detail || err?.message || "Erro ao carregar KPIs (rate limit?)")
       })
-      .finally(() => {
-        if (!alive) return
-        setLoading(false)
-      })
+      .finally(() => setLoading(false))
 
-    return () => {
-      alive = false
-    }
-  }, [league, season])
+    return () => controller.abort()
+  }, [season])
+
+  const mostLeague = data?.mostCompetitive?.label ?? "—"
+  const gapTop5 = data?.mostCompetitive ? String(data.mostCompetitive.gapTop5) : "—"
 
   return (
-    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-      <KpiItem
-        label="LIGAS TOTAIS"
-        value={data ? String(data.leaguesTotal) : "—"}
-        hint="Suportadas no site"
-        loading={loading}
+    <div>
+      {error ? (
+        <div className="mb-4 rounded-xl border border-red-500/40 bg-red-500/10 p-3 text-sm text-red-200">
+          {error}
+        </div>
+      ) : null}
+
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <KpiItem
+          label="LIGAS TOTAIS"
+          value={data ? String(data.leaguesTotal) : "—"}
+          hint="Suportadas no site"
+          loading={loading}
         />
 
         <KpiItem
-        label="TIMES TOTAIS"
-        value={data ? String(data.teamsTotal) : "—"}
-        hint="Somando ligas"
-        loading={loading}
+          label="TIMES TOTAIS"
+          value={data ? String(data.teamsTotal) : "—"}
+          hint="Somando standings"
+          loading={loading}
         />
 
         <KpiItem
-        label="JOGOS REGISTRADOS"
-        value={data ? String(data.gamesTotal) : "—"}
-        hint={`Temporada ${season}`}
-        loading={loading}
+          label="LIGA MAIS EQUILIBRADA"
+          value={data ? mostLeague : "—"}
+          hint="Menor distância (1º–5º)"
+          loading={loading}
         />
 
         <KpiItem
-        label="MÉDIA DE GOLS (FT)"
-        value={data ? formatAvg(data.avgGoalsFT) : "—"}
-        hint="Só jogos finalizados"
-        loading={loading}
+          label="GAP TOP 5 (PTS)"
+          value={data ? gapTop5 : "—"}
+          hint="Pontos (1º - 5º)"
+          loading={loading}
         />
+      </div>
     </div>
   )
 }

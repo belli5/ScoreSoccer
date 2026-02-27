@@ -1,6 +1,24 @@
 import { apiFootball } from "@/lib/api_football"
 import { getCache, setCache } from "@/lib/simpleCache"
 
+function extractApiError(data: any): string | null {
+  const err = data?.errors
+
+  if (!err) return null
+  if (Array.isArray(err)) return err.length > 0 ? JSON.stringify(err) : null
+
+  if (typeof err === "object") {
+    const keys = Object.keys(err)
+    if (keys.length === 0) return null
+    for (const k of ["rateLimit", "requests", "token", "message"]) {
+      if (err[k]) return String(err[k])
+    }
+    return JSON.stringify(err)
+  }
+
+  return String(err)
+}
+
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url)
   const league = searchParams.get("league") || "71"
@@ -11,7 +29,24 @@ export async function GET(req: Request) {
   if (cached) return Response.json(cached)
 
   const standingsData = await apiFootball("/standings", { league, season })
+
+  // ✅ Se deu erro (rateLimit etc.), não cacheia e devolve 429
+  const apiErr = extractApiError(standingsData)
+  if (apiErr) {
+    return Response.json(
+      { message: "API-Football error", detail: apiErr },
+      { status: 429 }
+    )
+  }
+
   const table = standingsData?.response?.[0]?.league?.standings?.[0] ?? []
+  if (!Array.isArray(table) || table.length === 0) {
+    // ✅ Sem tabela -> não cacheia vazio
+    return Response.json(
+      { message: "Sem dados de standings para essa liga/temporada." },
+      { status: 404 }
+    )
+  }
 
   const top5 = table.slice(0, 5).map((r: any) => ({
     rank: r.rank,
@@ -22,12 +57,11 @@ export async function GET(req: Request) {
     gf: r.all?.goals?.for,
     ga: r.all?.goals?.against,
     gd: r.goalsDiff,
-    form: r.form ?? null, // ex: "WWDLW" (às vezes vem)
+    form: r.form ?? null,
   }))
 
   const leader = top5[0]?.name ?? null
 
-  // Melhor ataque/defesa (considerando jogos disputados pra evitar empates injustos)
   const bestAttackRow =
     table.reduce((best: any, cur: any) => {
       const curGF = cur?.all?.goals?.for ?? 0
@@ -63,8 +97,10 @@ export async function GET(req: Request) {
     top5,
   }
 
-  // 1h de cache (standings não muda a cada segundo)
-  setCache(key, payload, 60 * 60 * 1000)
+  // ✅ Só cacheia se tem top5 (evita cachear vazio)
+  if (top5.length > 0) {
+    setCache(key, payload, 6 * 60 * 60 * 1000) // 1h
+  }
 
   return Response.json(payload)
 }
