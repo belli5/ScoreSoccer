@@ -20,10 +20,24 @@ export async function GET(req: Request) {
   }
 
   const seasonNum = Number(season)
-  const from = `${seasonNum}-01-01`
-  const to = `${seasonNum}-12-31`
 
-  // pega todos os jogos finalizados do time no Brasileirão
+  // Europa (39 Premier, 140 LaLiga, 78 Bundesliga) -> temporada cruza ano
+  const EURO_LEAGUES = new Set(["39", "140", "78"])
+
+  let from: string
+  let to: string
+
+  if (EURO_LEAGUES.has(String(league))) {
+    // temporada 2024/25
+    from = `${seasonNum}-07-01`
+    to = `${seasonNum + 1}-06-30`
+  } else {
+    // Brasil etc (normalmente ano fechado)
+    from = `${seasonNum}-01-01`
+    to = `${seasonNum}-12-31`
+  }
+
+  
   const raw = await apiFootball("/fixtures", {
     team: teamId,
     league,

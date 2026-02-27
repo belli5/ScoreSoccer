@@ -20,20 +20,25 @@ function extractApiError(data: any): string | null {
   return String(err)
 }
 
+type MostCompetitive = {
+  id: string
+  label: string
+  gapTop5: number
+  logo?: string
+}
+
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url)
   const season = searchParams.get("season") || "2024"
 
-  const key = `kpis:site:season=${season}:standingsOnly`
+  const key = `kpis:site:season=${season}:standingsOnly:v2` // 👈 mudei pra v2 pra furar cache antigo
   const cached = getCache(key)
   if (cached) return Response.json(cached)
 
   const leaguesTotal = LEAGUES.length
-
   let teamsTotal = 0
 
-  // menor gap entre 1º e 5º
-  let mostCompetitive: { id: string; label: string; gapTop5: number } | null = null
+  let mostCompetitive: MostCompetitive | null = null
 
   for (const lg of LEAGUES) {
     const standingsData = await apiFootball("/standings", {
@@ -49,13 +54,12 @@ export async function GET(req: Request) {
       )
     }
 
+    const leagueLogo = standingsData?.response?.[0]?.league?.logo
     const table = standingsData?.response?.[0]?.league?.standings?.[0] ?? []
     if (!Array.isArray(table) || table.length === 0) continue
 
-    // ✅ timesTotal via standings (não usa /teams)
     teamsTotal += table.length
 
-    // ✅ gapTop5 via standings
     if (table.length >= 5) {
       const p1 = table[0]?.points
       const p5 = table[4]?.points
@@ -63,20 +67,24 @@ export async function GET(req: Request) {
       if (typeof p1 === "number" && typeof p5 === "number") {
         const gap = p1 - p5
         if (!mostCompetitive || gap < mostCompetitive.gapTop5) {
-          mostCompetitive = { id: String(lg.id), label: lg.label, gapTop5: gap }
+          mostCompetitive = {
+            id: String(lg.id),
+            label: lg.label,
+            gapTop5: gap,
+            logo: leagueLogo,
+          }
         }
       }
     }
-  }
+  } // ✅ FECHA O FOR AQUI
 
   const payload = {
     leaguesTotal,
     teamsTotal,
-    mostCompetitive, // pode ser null se alguma liga não tiver standings/top5
+    mostCompetitive,
   }
 
-  // ✅ cache forte pra não estourar 10/min
-  setCache(key, payload, 6 * 60 * 60 * 1000) // 6h
+  setCache(key, payload, 6 * 60 * 60 * 1000)
 
   return Response.json(payload)
 }

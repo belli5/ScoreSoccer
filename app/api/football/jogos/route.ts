@@ -13,9 +13,19 @@ export async function GET(req: Request) {
 
   const seasonNum = Number(season)
 
-  // Brasileirão 2024 (aprox): abril a dezembro
-  const from = `${seasonNum}-01-01`
-  const to = `${seasonNum}-12-31`
+  // ligas europeias que cruzam o ano (2024/25)
+  const EURO_LEAGUES = new Set(["39", "140", "78"])
+
+  let from: string
+  let to: string
+
+  if (EURO_LEAGUES.has(String(league))) {
+    from = `${seasonNum}-07-01`
+    to = `${seasonNum + 1}-06-30`
+  } else {
+    from = `${seasonNum}-01-01`
+    to = `${seasonNum}-12-31`
+  }
 
   const data = await apiFootball("/fixtures", {
     team: teamId,

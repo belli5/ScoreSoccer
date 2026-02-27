@@ -1,22 +1,25 @@
 "use client"
 
+import Image from "next/image"
 import { useEffect, useRef, useState } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 
 type KpiData = {
   leaguesTotal: number
   teamsTotal: number
-  mostCompetitive: { id: string; label: string; gapTop5: number } | null
+  mostCompetitive: { id: string; label: string; gapTop5: number; logo?: string } | null
 }
 
 function KpiItem({
   label,
   value,
+  valueNode,
   hint,
   loading,
 }: {
   label: string
-  value: string
+  value?: string
+  valueNode?: React.ReactNode
   hint?: string
   loading?: boolean
 }) {
@@ -28,6 +31,8 @@ function KpiItem({
         <div className="mt-3 flex items-end justify-between gap-3">
           {loading ? (
             <div className="h-9 w-24 animate-pulse rounded bg-white/10" />
+          ) : valueNode ? (
+            valueNode
           ) : (
             <p className="text-3xl font-semibold tracking-tight text-[#39FF14]">{value}</p>
           )}
@@ -72,6 +77,7 @@ export default function KpiCards({ season = "2024" }: { season?: string }) {
   }, [season])
 
   const mostLeague = data?.mostCompetitive?.label ?? "—"
+  const mostLogo = data?.mostCompetitive?.logo
   const gapTop5 = data?.mostCompetitive ? String(data.mostCompetitive.gapTop5) : "—"
 
   return (
@@ -99,9 +105,27 @@ export default function KpiCards({ season = "2024" }: { season?: string }) {
 
         <KpiItem
           label="LIGA MAIS EQUILIBRADA"
-          value={data ? mostLeague : "—"}
           hint="Menor distância (1º–5º)"
           loading={loading}
+          valueNode={
+            mostLogo ? (
+              <div className="flex items-center gap-3">
+                <div className="relative h-10 w-10 rounded-full border border-[#0B0F14]">
+                  <Image
+                    src={mostLogo}
+                    alt={mostLeague}
+                    fill
+                    className="p-1 object-contain"
+                  />
+                </div>
+                <p className="text-base font-semibold text-[#39FF14] leading-none">
+                  {mostLeague}
+                </p>
+              </div>
+            ) : (
+              <p className="text-3xl font-semibold tracking-tight text-[#39FF14]">{mostLeague}</p>
+            )
+          }
         />
 
         <KpiItem
