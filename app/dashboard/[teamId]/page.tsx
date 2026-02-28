@@ -14,7 +14,7 @@ export default async function TeamDashboard({ params, searchParams }: PageProps)
     const leagueId = sp.league ?? "71"
     const season = sp.season ?? "2024"
 
-    const baseUrl = "http://localhost:3000"
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"
     
     const teamRes = await fetch(`${baseUrl}/api/football/teams?teamId=${teamId}`, {
         cache: "no-store",

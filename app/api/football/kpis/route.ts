@@ -31,7 +31,7 @@ export async function GET(req: Request) {
   const { searchParams } = new URL(req.url)
   const season = searchParams.get("season") || "2024"
 
-  const key = `kpis:site:season=${season}:standingsOnly:v2` // 👈 mudei pra v2 pra furar cache antigo
+  const key = `kpis:site:season=${season}:standingsOnly:v2` 
   const cached = getCache(key)
   if (cached) return Response.json(cached)
 

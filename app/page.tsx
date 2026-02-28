@@ -3,7 +3,9 @@ import Navbar from "@/components/layout/Navbar"
 import HomeSwipe from "@/app/Home/homeSwipe"
 
 export default async function Home() {
-  const res = await fetch("http://localhost:3000/api/football/matches-by-date", {
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"
+
+  const res = await fetch(`${baseUrl}/api/football/matches-by-date`, {
     cache: "no-store",
   })
 

@@ -3,7 +3,9 @@ import TeamsGrid from "./teams-grid"
 import { LEAGUES } from "@/lib/leagues"
 
 export default async function FavoritosPage() {
-  const res = await fetch("http://localhost:3000/api/football/teams-by-league", {
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"
+
+  const res = await fetch(`${baseUrl}/api/football/teams-by-league`, {
     cache: "no-store",
   })
 
