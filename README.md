@@ -82,19 +82,83 @@ O foco do projeto é apresentar dados de forma clara, estratégica e comparável
 🏠 Home
 
 <img width="1919" height="910" alt="Captura de tela 2026-02-28 110226" src="https://github.com/user-attachments/assets/f38c3630-10a8-48a4-875a-91b0b5d00c93" />
+<img width="1919" height="908" alt="Captura de tela 2026-02-28 110420" src="https://github.com/user-attachments/assets/1c3d712f-e470-4b19-91ca-844214412980" />
 
+A página inicial foi projetada para oferecer uma visão dinâmica e organizada das partidas, priorizando navegação fluida e personalização.
 
-A página inicial exibe:
+Ela funciona como o centro de interação do sistema, reunindo jogos por data e permitindo que o usuário acompanhe rapidamente os confrontos do dia.
 
--> Jogos organizados por data
+📅 Organização por Data
 
--> Sistema de favoritos (persistido via localStorage)
+-> Jogos agrupados por dia
 
--> Navegação por dias com scroll horizontal
+-> Exibição clara de data, horário e status da partida
 
--> Separação entre jogos gerais e jogos favoritos
+-> Estrutura pensada para leitura rápida
+
+-> Separação visual entre competições
+
+-> Essa organização facilita o acompanhamento diário dos jogos.
+
+🔄 Navegação Horizontal por Dias
+
+A navegação entre datas é feita através de scroll horizontal, proporcionando:
+
+-> Transição fluida entre dias
+
+-> Experiência semelhante a aplicativos esportivos modernos
+
+-> Interação rápida sem necessidade de recarregamento completo da página
+
+-> Esse modelo melhora a usabilidade e torna a navegação mais intuitiva.
+
+⭐ Sistema de Favoritos Integrado
+
+A Home possui integração direta com o sistema de favoritos da aplicação.
+
+Os clubes marcados pelo usuário influenciam a forma como os jogos são exibidos, permitindo uma experiência personalizada.
+
+🟢 Aba de Favoritos na Home
+
+Além da visualização geral dos jogos do dia, a página possui uma aba dedicada aos jogos dos times favoritados.
+
+Essa aba permite:
+
+-> Visualizar apenas partidas dos clubes selecionados
+
+-> Acesso rápido aos jogos mais relevantes para o usuário
+
+-> Alternar entre visão geral e visão personalizada
+
+-> Foco total no acompanhamento do próprio time
+
+Essa funcionalidade torna a experiência mais direcionada e centrada no usuário.
+
+💾 Persistência Local
+
+O sistema utiliza localStorage para manter os times favoritos salvos no navegador.
+
+Isso garante que:
+
+-> As preferências não sejam perdidas ao atualizar a página
+
+-> O usuário mantenha sua personalização ativa
+
+-> Não seja necessário backend para armazenar preferências
+
+🎨 Layout e Experiência
+
+A Home foi desenvolvida com foco em:
 
 -> Layout moderno e responsivo
+
+-> Tema visual consistente (neon #39FF14)
+
+-> Componentização reutilizável
+
+-> Separação clara entre informações principais e secundárias
+
+A combinação entre organização por data e aba de favoritos cria uma experiência semelhante a aplicativos esportivos profissionais.
 
 📊 Dashboard Analítico
 
@@ -107,13 +171,75 @@ Painel central com indicadores estratégicos:
 
 -> Total de times
 
--> Total de partidas registradas
-
--> Média de gols por partida
+-> Diferença entre o 1° colocado e o 5° colocado(mostrando o porque é a liga mais competitiva)
 
 -> Liga mais competitiva
 
 -> Inclui gráficos comparativos entre ligas para análise de competitividade.
+
+📊 Análise Comparativa entre Ligas
+
+Além dos KPIs, o Dashboard inclui gráficos comparativos que permitem analisar:
+
+-> Diferença de pontos entre líderes
+
+-> Distribuição de vitórias nas ligas
+
+-> Média de gols por campeonato
+
+-> Índices de equilíbrio competitivo
+
+Essa abordagem permite identificar padrões como:
+
+-> Ligas mais equilibradas
+
+-> Campeonatos com domínio de poucos clubes
+
+-> Competições com maior volume ofensivo
+
+-> Diferenças estruturais entre torneios
+
+🧠 Objetivo do Dashboard
+
+O Dashboard foi pensado como um ambiente de análise estratégica, aplicando:
+
+-> Agregação de dados de múltiplas ligas
+
+-> Normalização de informações vindas da API
+
+-> Cálculo manual de métricas estatísticas
+
+-> Transformação de dados em visualizações interpretáveis
+
+Ele representa a consolidação do projeto como um sistema analítico, e não apenas um site de consulta de resultados.
+
+⚙️ Aspectos Técnicos
+
+O Dashboard envolve:
+
+-> Consumo de múltiplas rotas internas
+
+-> Processamento server-side para agregação de dados
+
+-> Geração de datasets estruturados para gráficos
+
+-> Componentização reutilizável para KPIs e visualizações
+
+-> Separação entre lógica de cálculo e renderização
+
+📈 Por que isso é relevante?
+
+Essa página demonstra capacidade de:
+
+-> Trabalhar com múltiplas fontes simultaneamente
+
+-> Criar métricas próprias a partir de dados brutos
+
+-> Construir comparações entre entidades distintas (ligas)
+
+-> Organizar visualizações de forma estratégica
+
+O Dashboard consolida o ScoreSoccer como um projeto de engenharia aplicada a análise de dados esportivos.
 
 🏆 Página da Liga
 
