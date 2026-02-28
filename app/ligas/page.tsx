@@ -19,7 +19,7 @@ export default async function LigaPage({ searchParams }: PageProps) {
 
   const res = await fetch(
     `${baseUrl}/api/football/standings?league=${leagueId}&season=${season}`,
-    { cache: "no-store" }
+    { next: { revalidate: 600 } } // 10 min
   )
 
   const data = await res.json()
