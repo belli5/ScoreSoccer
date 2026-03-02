@@ -46,7 +46,7 @@ export default function Navbar() {
           <li>
             <Link
               className="block hover:underline underline-offset-4 md:inline"
-              href="/destaques"
+              href="/aovivo"
               onClick={() => setOpen(false)}
             >
               Ao Vivo
