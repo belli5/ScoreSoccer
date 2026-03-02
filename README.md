@@ -2,9 +2,69 @@
 
 O ScorePulse é uma plataforma analítica de futebol desenvolvida com foco em visualização de dados, performance de ligas e análise estatística de competições.
 
-O projeto foi construído utilizando a API-Football como fonte de dados oficial, aplicando estratégias de tratamento, organização e otimização de requisições para transformar dados brutos em informações estratégicas e visualmente intuitivas.
+O projeto foi construído utilizando a API-Football como fonte oficial de dados, aplicando estratégias de tratamento, organização e otimização de requisições para transformar dados brutos em informações estratégicas e visualmente intuitivas.
 
 A proposta vai além de apenas exibir resultados: o objetivo é apresentar insights competitivos, comparativos entre ligas e métricas relevantes que ajudam a entender o comportamento das competições ao longo da temporada.
+
+📱 Experiência Mobile First
+
+O ScorePulse foi projetado seguindo o conceito Mobile First, garantindo:
+
+-> Interface totalmente responsiva
+
+-> Navegação fluida com scroll horizontal por datas
+
+-> Sistema de favoritos otimizado para uso rápido
+
+-> Componentes adaptáveis para diferentes tamanhos de tela
+
+-> Performance otimizada para conexões móveis
+
+A experiência mobile foi pensada para simular o comportamento de aplicativos nativos de esportes, priorizando rapidez na visualização de jogos e interação intuitiva.
+
+🛠️ Arquitetura e Tecnologias Utilizadas
+
+O projeto foi desenvolvido utilizando tecnologias modernas de mercado:
+
+-> Front-end
+
+-> Next.js 16 (App Router)
+
+-> React
+
+-> TypeScript
+
+-> Tailwind CSS
+
+-> ShadCN UI
+
+-> Componentização modular
+
+-> Server Components + Client Components estratégicos
+
+-> Back-end (API Layer)
+
+-> Rotas server-side via /api
+
+-> Tratamento de dados da API-Football
+
+-> Controle de cache e revalidação (revalidate)
+
+-> Redução estratégica de requisições para evitar limite diário
+
+Estratégias Técnicas Implementadas
+
+✅ Cache com tempo de expiração para reduzir consumo da API
+
+✅ Organização de dados por temporada, liga e data
+
+✅ Persistência de favoritos via localStorage
+
+✅ Agrupamento inteligente de partidas por dia
+
+✅ Separação entre jogos gerais e jogos favoritos
+
+✅ Estrutura pensada para escalabilidade futura
 
 🎯 Objetivo do Projeto
 
